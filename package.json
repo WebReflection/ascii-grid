@@ -1,6 +1,6 @@
 {
   "name": "@webreflection/ascii-grid",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "main": "./cjs/index.js",
   "scripts": {
     "build": "npm run cjs && npm run rollup:es && npm run rollup:index && npm run rollup:component",
@@ -9,7 +9,12 @@
     "rollup:component": "rollup --config rollup/component.config.js",
     "rollup:index": "rollup --config rollup/index.config.js"
   },
-  "keywords": ["grid-template-areas", "grid-layout", "ascii", "grid"],
+  "keywords": [
+    "grid-template-areas",
+    "grid-layout",
+    "ascii",
+    "grid"
+  ],
   "author": "Andrea Giammarchi",
   "license": "ISC",
   "devDependencies": {
