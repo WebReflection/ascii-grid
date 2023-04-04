@@ -4,12 +4,15 @@ const asciiGrid = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8
 module.exports = asciiGrid;
 
 if (!customElements.get('ascii-grid')) {
-  const {COMMENT_NODE} = Node;
+  const {COMMENT_NODE, ELEMENT_NODE} = Node;
+
   const {find} = Array.prototype;
+
   const isGridComment = target => {
     return target.nodeType === COMMENT_NODE && target.data.startsWith('#');
   };
-  customElements.define('ascii-grid', class extends HTMLElement {
+
+  class ASCIIGrid extends HTMLElement {
     static observedAttributes = ['cols', 'rows'];
     attributeChangedCallback(name, _, value) {
       switch (name) {
@@ -46,5 +49,53 @@ if (!customElements.get('ascii-grid')) {
       else
         this.structure = structure;
     }
+  }
+
+  customElements.define('ascii-grid', ASCIIGrid);
+
+  const augment = node => {
+    const target = find.call(node.childNodes, isGridComment);
+    if (target) {
+      asciiGrid(target.data.slice(1)).applyTo(node);
+      for (const name of ASCIIGrid.observedAttributes) {
+        const value = node.getAttribute(name);
+        if (value)
+          ASCIIGrid.prototype.attributeChangedCallback.call(node, name, null, value);
+      }
+    }
+    else
+      console.error('unable to apply ascii-grid to ', node);
+  };
+
+  const augmentAll = node => {
+    for (const child of node.querySelectorAll('.ascii-grid'))
+      augment(child);
+  };
+
+  const observe = node => {
+    mo.observe(node, {
+      childList: true,
+      subtree: true
+    });
+    return node;
+  };
+
+  const mo = new MutationObserver(records => {
+    for (const {addedNodes} of records) {
+      for (const node of addedNodes) {
+        if (node.nodeType === ELEMENT_NODE) {
+          if (node.classList.contains('ascii-grid'))
+            augment(node);
+          augmentAll(node);
+        }
+      }
+    }
   });
+
+  augmentAll(observe(document));
+
+  const {attachShadow} = Element.prototype;
+  Element.prototype.attachShadow = function () {
+    return observe(attachShadow.apply(this, arguments));
+  };
 }
