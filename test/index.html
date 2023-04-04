@@ -7,13 +7,22 @@
   <script type="module">
   import(
     /^(?:localhost|[::1]|127(?:.d+){3})$/.test(location.hostname) ?
-    '../esm/index.js' :
-    'https://unpkg.com/ascii-grid?module'
+    '../esm/component.js' :
+    'https://unpkg.com/ascii-grid'
   )
   .then((module) => {
     console.log(module);
   });
   </script>
 </head>
-<body></body>
+<body>
+  <ascii-grid cols="10px 1fr 10px">
+    <!--#
+    a b c
+    -->
+    <div>a</div>
+    <div>b</div>
+    <div>c</div>
+  </ascii-grid>
+</body>
 </html>

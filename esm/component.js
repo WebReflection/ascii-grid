@@ -9,6 +9,18 @@ if (!customElements.get('ascii-grid')) {
     return target.nodeType === COMMENT_NODE && target.data.startsWith('#');
   };
   customElements.define('ascii-grid', class extends HTMLElement {
+    static observedAttributes = ['cols', 'rows'];
+    attributeChangedCallback(name, _, value) {
+      switch (name) {
+        case 'cols':
+          this.style['grid-template-columns'] = value;
+          break;
+        case 'rows':
+          this.style['grid-template-rows'] = value;
+          break;
+      }
+    }
+
     /** @type {string} */
     get structure() {
       const target = find.call(this.childNodes, isGridComment);
