@@ -7,11 +7,36 @@ if (!customElements.get('ascii-grid')) {
 
   const {find} = Array.prototype;
 
-  const isGridComment = target => {
+  const isGridStructure = target => {
     return target.nodeType === COMMENT_NODE && target.data.startsWith('#');
   };
 
+  /** @type {WeakMap<Element, MutationObserver>} */
+  const wm = new WeakMap;
+
+  /**
+   * Observe direct child list changes and invoke the callback
+   * once a structure for the grid has been found.
+   * @param {Element} node 
+   * @param {function} callback 
+   */
+  const waitForStructure = (node, callback) => {
+    const mo = new MutationObserver(() => {
+      if (find.call(node.childNodes, isGridStructure)) {
+        mo.disconnect();
+        wm.delete(node);
+        // works with both methods and utilities
+        callback.call(node, node);
+      }
+    });
+    mo.observe(node, {childList: true});
+    wm.set(node, mo);
+  };
+
   class ASCIIGrid extends HTMLElement {
+    /** @type {MutataionObserver} */
+    #mo;
+
     static observedAttributes = ['cols', 'rows'];
     attributeChangedCallback(name, _, value) {
       switch (name) {
@@ -26,15 +51,13 @@ if (!customElements.get('ascii-grid')) {
 
     /** @type {string} */
     get structure() {
-      const target = find.call(this.childNodes, isGridComment);
+      const target = find.call(this.childNodes, isGridStructure);
       return target ? target.data.slice(1) : '';
     }
 
-    /**
-     * @param {string} data
-     */
+    /** @param {string} data */
     set structure(data) {
-      let target = find.call(this.childNodes, isGridComment);
+      let target = find.call(this.childNodes, isGridStructure);
       if (!target)
         target = this.appendChild(document.createComment(''));
       target.data = '#' + data;
@@ -43,17 +66,17 @@ if (!customElements.get('ascii-grid')) {
 
     connectedCallback() {
       const {structure} = this;
-      if (!structure)
-        requestAnimationFrame(() => this.connectedCallback());
-      else
+      if (structure)
         this.structure = structure;
+      else if (!wm.has(this))
+        waitForStructure(this, this.connectedCallback);
     }
   }
 
   customElements.define('ascii-grid', ASCIIGrid);
 
   const augment = node => {
-    const target = find.call(node.childNodes, isGridComment);
+    const target = find.call(node.childNodes, isGridStructure);
     if (target) {
       asciiGrid(target.data.slice(1)).applyTo(node);
       for (const name of ASCIIGrid.observedAttributes) {
@@ -62,8 +85,8 @@ if (!customElements.get('ascii-grid')) {
           ASCIIGrid.prototype.attributeChangedCallback.call(node, name, null, value);
       }
     }
-    else
-      console.error('unable to apply ascii-grid to ', node);
+    else if (!wm.has(node))
+      waitForStructure(node, augment);
   };
 
   const augmentAll = node => {
@@ -72,10 +95,7 @@ if (!customElements.get('ascii-grid')) {
   };
 
   const observe = node => {
-    mo.observe(node, {
-      childList: true,
-      subtree: true
-    });
+    mo.observe(node, {childList: true, subtree: true});
     return node;
   };
 

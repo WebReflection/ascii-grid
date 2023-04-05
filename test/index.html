@@ -3,14 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>ascii-grid</title>
-  <script type="module">
-  import(
-    /^(?:localhost|[::1]|127(?:.d+){3})$/.test(location.hostname) ?
-    '../esm/component.js' :
-    'https://unpkg.com/ascii-grid'
-  );
-  </script>
+  <title>ascii-grid Custom Element</title>
+  <script type="module" src="../component.js"></script>
 </head>
 <body>
   <ascii-grid cols="10px 1fr 10px">
@@ -22,4 +16,13 @@
     <div>c</div>
   </ascii-grid>
 </body>
+
+<script>
+  setTimeout(() => {
+    document.querySelector('ascii-grid').structure = `
+          a
+      b b c
+    `;
+  }, 1000);
+</script>
 </html>

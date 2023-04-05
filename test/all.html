@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ascii-grid README example</title>
+  <script type="module">
+// /component also registers ascii-grid as Custom Element
+// and allows any node to have a grid layout in it too.
+import grid from '../component.js';
+
+const template = document.createElement('template');
+template.innerHTML = `
+<!-- as custom element -->
+<ascii-grid cols="10px 1fr 10px">
+  <!--#
+    a b c
+  -->
+  <div>a</div>
+  <div>b</div>
+  <div>c</div>
+</ascii-grid>
+<!-- as generic element -->
+<div class="ascii-grid" cols="10px 1fr 10px">
+  <!--#
+    a b c
+  -->
+  <div>a</div>
+  <div>b</div>
+  <div>c</div>
+</body>
+`.trim();
+
+document.body.appendChild(template.content);
+  </script>
+</head>
+</html>

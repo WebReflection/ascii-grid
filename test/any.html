@@ -3,21 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>ascii-grid</title>
-  <script type="module">
-  import(
-    /^(?:localhost|[::1]|127(?:.d+){3})$/.test(location.hostname) ?
-    '../esm/component.js' :
-    'https://unpkg.com/ascii-grid'
-  );
-  </script>
+  <title>ascii-grid any element</title>
+  <script type="module" src="../component.js"></script>
 </head>
 <body class="ascii-grid" cols="10px 1fr 10px">
-  <!--#
-    a b c
-    -->
   <div>a</div>
   <div>b</div>
   <div>c</div>
 </body>
+<script>
+  setTimeout(() => {
+    document.body.appendChild(
+      document.createComment(`#a b c`)
+    );
+  }, 1000);
+</script>
 </html>
