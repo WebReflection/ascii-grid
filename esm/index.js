@@ -76,7 +76,7 @@ export default layout => {
     }
   }
   const ids = area.flat().filter(id => id !== '.');
-  layout = area.map(row => `"${row.join(' ')}"`).join(' ');
+  layout = area.map(row => `'${row.join(' ')}'`).join(' ');
   return {
     /**
      * Enforces the grid layout to the element and its direct children.
