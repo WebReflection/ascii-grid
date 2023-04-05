@@ -1,6 +1,6 @@
 {
   "name": "@webreflection/ascii-grid",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "main": "./cjs/index.js",
   "scripts": {
     "build": "npm run cjs && npm run rollup:es && npm run rollup:index && npm run rollup:component",
