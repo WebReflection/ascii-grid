@@ -27,6 +27,15 @@ template.innerHTML = `
   <div>a</div>
   <div>b</div>
   <div>c</div>
+</div>
+<!-- with emptiness -->
+<div class="ascii-grid" cols="10px 1fr 10px">
+  <!--#
+    a . b
+  -->
+  <div>a</div>
+  <div>b</div>
+</div>
 </body>
 `.trim();
 

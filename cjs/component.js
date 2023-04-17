@@ -8,9 +8,9 @@ if (!customElements.get('ascii-grid')) {
 
   const {find} = Array.prototype;
 
-  const isGridStructure = target => {
-    return target.nodeType === COMMENT_NODE && target.data.startsWith('#');
-  };
+  const isGridStructure = target => (
+    target.nodeType === COMMENT_NODE && target.data.startsWith('#')
+  );
 
   /** @type {WeakMap<Element, MutationObserver>} */
   const wm = new WeakMap;

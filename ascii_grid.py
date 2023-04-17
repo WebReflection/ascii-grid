@@ -1,4 +1,4 @@
-from re import match, split, sub
+from re import match, split, findall
 
 class Grid:
   def __init__(self, ids, layout):
@@ -30,55 +30,23 @@ class Grid:
         known.append(identifier)
     return "\n".join(output)
 
-def _add_dot(row, c, p):
-  if c == p:
-    c = ""
-    row.append(".")
-  return c
-
-def _drop_identifiers(layout):
-  index = {"i": 0}
-  placeholders = {}
-  return sub("\S+", lambda m: _get_identifier(placeholders, index, m), layout)
-
-def _get_identifier(placeholders, index, m):
-  identifier = m.group(0)
-  if (identifier in placeholders) == False:
-    c = "\n"
-    while match("[\r\n\t ]", c):
-      c = chr(index["i"])
-      index["i"] += 1
-    placeholders[identifier] = c
-  return placeholders[identifier]
-
-def _normalize(layout):
-  width = 0
-  start = len(layout)
+def _get_area(layout):
+  i = 0
   lines = []
-  for line in split("[\r\n]+", _drop_identifiers(layout)):
-    endLength = len(line.rstrip())
-    if endLength:
-      width = max(width, endLength)
-      start = min(start, len(line) - len(line.lstrip()))
-      lines.append(line)
-  return "\n".join(map(lambda line: line[start:].ljust(width - start), lines))
+  placeholders = {".": "."}
+  for line in split("[\r\n]+", layout):
+    row = []
+    for identifier in findall("\S+", line):
+      if (identifier in placeholders) == False:
+        placeholders[identifier] = "g" + str(i)
+        i += 1
+      row.append(placeholders[identifier])
+    if len(row):
+      lines.append(row)
+  return lines
 
 def grid(layout):
-  p = "";
-  row = [];
-  area = [row];
-  for c in _normalize(layout):
-    match c:
-      case " ":
-        p = _add_dot(row, c, p)
-      case "\t":
-        p = _add_dot(row, c, p)
-      case "\n":
-        row = []
-        area.append(row)
-      case _:
-        p = c
-        row.append("g" + str(ord(c)))
+  area = _get_area(layout)
   ids = filter(
     lambda id: id != ".",
     [identifier for row in area for identifier in row]

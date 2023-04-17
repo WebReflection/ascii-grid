@@ -1,48 +1,28 @@
 /*! (c) Andrea Giammarchi */
 
-const {max, min} = Math;
-const {fromCharCode} = String;
-
 /**
- * Remove any sequence of chars to normalize identifiers as single char,
- * allowing also the usage of combined emoji as grid placeholders.
- * @param {string} layout 
- * @returns {string}
- */
-const dropIdentifiers = layout => {
-  let i = 0;
-  const placeholders = new Map;
-  return layout.replace(/\S+/g, id => {
-    if (!placeholders.has(id)) {
-      let c = '';
-      do { c = fromCharCode(i++); }
-      while (/[\r\n\t ]/.test(c));
-      placeholders.set(id, c);
-    }
-    return placeholders.get(id);
-  });
-};
-
-/**
- * Parse a generic string to understand the underlying grid.
+ * Parse a generic string and returns an array of rows where each
+ * cell is an entry in the row.
  * @param {string} layout
- * @returns {string}
+ * @returns {string[][]}
  */
-const normalize = layout => {
-  let width = 0;
-  let start = Infinity;
+const getArea = layout => {
+  let i = 0, match;
+  const ids = /\S+/g;
   const lines = [];
-  for (const line of dropIdentifiers(layout).split(/[\r\n]+/)) {
-    const endLength = line.trimEnd().length;
-    if (endLength) {
-      width = max(width, endLength);
-      start = min(start, line.length - line.trimStart().length);
-      lines.push(line);
+  const placeholders = new Map([['.', '.']]);
+  for (const line of layout.split(/[\r\n]+/)) {
+    const row = [];
+    while (match = ids.exec(line)) {
+      const [id] = match;
+      if (!placeholders.has(id))
+        placeholders.set(id, `g${i++}`);
+      row.push(placeholders.get(id));
     }
+    if (row.length)
+      lines.push(row);
   }
-  return lines.map(
-    line => line.slice(start).padEnd(width - start)
-  ).join('\n');
+  return lines;
 };
 
 /**
@@ -52,29 +32,7 @@ const normalize = layout => {
  * @param {string} layout
  */
 export default layout => {
-  let p = '';
-  let row = [];
-  const area = [row];
-  for (const c of normalize(layout)) {
-    switch (c) {
-      case ' ':
-      case '\t':
-        if (c === p) {
-          p = '';
-          row.push('.');
-        }
-        else
-          p = c;
-        break;
-      case '\n':
-        area.push(row = []);
-        break;
-      default:
-        p = c;
-        row.push('g' + c.charCodeAt(0));
-        break;
-    }
-  }
+  const area = getArea(layout);
   const ids = area.flat().filter(id => id !== '.');
   layout = area.map(row => `"${row.join(' ')}"`).join(' ');
   return {
