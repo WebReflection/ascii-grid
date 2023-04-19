@@ -6,10 +6,22 @@ if (!customElements.get('ascii-grid')) {
   const {COMMENT_NODE, ELEMENT_NODE} = Node;
 
   const {find} = Array.prototype;
+  const attributeFilter = ['cols', 'rows'];
 
   const isGridStructure = target => (
     target.nodeType === COMMENT_NODE && target.data.startsWith('#')
   );
+
+  const attributeChangedCallback = (node, name, value) => {
+    switch (name) {
+      case 'cols':
+        node.style['grid-template-columns'] = value;
+        break;
+      case 'rows':
+        node.style['grid-template-rows'] = value;
+        break;
+    }
+  };
 
   /** @type {WeakMap<Element, MutationObserver>} */
   const wm = new WeakMap;
@@ -34,19 +46,9 @@ if (!customElements.get('ascii-grid')) {
   };
 
   class ASCIIGrid extends HTMLElement {
-    /** @type {MutataionObserver} */
-    #mo;
-
-    static observedAttributes = ['cols', 'rows'];
+    static observedAttributes = attributeFilter;
     attributeChangedCallback(name, _, value) {
-      switch (name) {
-        case 'cols':
-          this.style['grid-template-columns'] = value;
-          break;
-        case 'rows':
-          this.style['grid-template-rows'] = value;
-          break;
-      }
+      attributeChangedCallback(this, name, value);
     }
 
     /** @type {string} */
@@ -79,11 +81,9 @@ if (!customElements.get('ascii-grid')) {
     const target = find.call(node.childNodes, isGridStructure);
     if (target) {
       asciiGrid(target.data.slice(1)).applyTo(node);
-      for (const name of ASCIIGrid.observedAttributes) {
-        const value = node.getAttribute(name);
-        if (value)
-          ASCIIGrid.prototype.attributeChangedCallback.call(node, name, null, value);
-      }
+      attributesObserver.observe(node, {attributeFilter});
+      for (const name of attributeFilter)
+        attributeChangedCallback(node, name, node.getAttribute(name));
     }
     else if (!wm.has(node))
       waitForStructure(node, augment);
@@ -98,6 +98,11 @@ if (!customElements.get('ascii-grid')) {
     mo.observe(node, {childList: true, subtree: true});
     return node;
   };
+
+  const attributesObserver = new MutationObserver(records => {
+    for (const {target, attributeName} of records)
+      attributeChangedCallback(target, attributeName, target.getAttribute(attributeName));
+  });
 
   const mo = new MutationObserver(records => {
     for (const {addedNodes} of records) {

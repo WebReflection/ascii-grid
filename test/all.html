@@ -41,6 +41,9 @@ template.innerHTML = `
 `.trim();
 
 document.body.appendChild(template.content);
+setTimeout(() => {
+  document.body.lastElementChild.setAttribute('cols', '10px 10px 1fr');
+}, 1000);
   </script>
 </head>
 </html>
